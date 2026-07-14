@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Food — Tiffin Box Admin</title>
+    <link rel="icon" href="../static/images/logo-mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../static/css/style.css" />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <aside class="admin-sidebar">
+        <div class="brand">
+          <img
+            src="../static/images/logo-mark.svg"
+            alt=""
+            style="width: 26px; height: 32px"
+          />
+          <span class="brand-name">Tiffin<em>Box</em></span>
+        </div>
+        <nav class="admin-nav">
+          <a href="dashboard.html">📊 Dashboard</a>
+          <a href="manage_food.html" class="active">🍲 Manage food</a>
+          <a href="orders.html">🧾 Orders</a>
+          <a href="admin_login.html">🚪 Log out</a>
+        </nav>
+      </aside>
+
+      <div class="admin-main">
+        <div class="admin-topbar">
+          <h1>Manage food</h1>
+          <button type="button" class="btn btn-primary btn-sm" data-open-add>
+            + Add new dish
+          </button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>All dishes</h3>
+            <span class="field-hint"
+              >Changes save to this browser for the demo — wire this table to
+              your API for production.</span
+            >
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Dish</th>
+                <th>Type</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody data-food-table-body>
+              <!-- rendered by javascript/script.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- add / edit modal -->
+    <div class="modal-backdrop" data-food-modal>
+      <div class="modal">
+        <div class="modal-head">
+          <h3 data-modal-title>Add new dish</h3>
+          <button
+            type="button"
+            class="modal-close"
+            data-modal-close
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+        <form data-food-form>
+          <div class="field">
+            <label for="food_name">Dish name</label>
+            <input
+              type="text"
+              id="food_name"
+              name="name"
+              placeholder="e.g. Hyderabadi Biryani"
+              required
+            />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="food_category">Category</label>
+              <select id="food_category" name="category" required>
+                <option value="thali">Thali</option>
+                <option value="dosa">Dosa</option>
+                <option value="biryani">Biryani</option>
+                <option value="snacks">Snacks</option>
+                <option value="dessert">Dessert</option>
+                <option value="beverage">Beverage</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="food_price">Price (₹)</label>
+              <input
+                type="number"
+                id="food_price"
+                name="price"
+                min="0"
+                placeholder="199"
+                required
+              />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="food_veg">Type</label>
+              <select id="food_veg" name="veg">
+                <option value="true">Vegetarian</option>
+                <option value="false">Non-vegetarian</option>
+              </select>
+            </div>
+            <div
+              class="field"
+              style="display: flex; align-items: flex-end; padding-bottom: 12px"
+            >
+              <label class="checkbox-row"
+                ><input type="checkbox" name="stock" checked /> In stock</label
+              >
+            </div>
+          </div>
+          <div class="field">
+            <label for="food_desc">Description</label>
+            <textarea
+              id="food_desc"
+              name="desc"
+              rows="3"
+              placeholder="Short description shown on the menu card"
+            ></textarea>
+          </div>
+          <div
+            class="flex gap-8"
+            style="justify-content: flex-end; margin-top: 8px"
+          >
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              data-modal-close
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary btn-sm">
+              Save dish
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="../static/javascript/script.js"></script>
+  </body>
+</html>

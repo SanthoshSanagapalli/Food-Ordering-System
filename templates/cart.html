@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Cart — Tiffin Box</title>
+    <link rel="icon" href="../static/images/logo-mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../static/css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav">
+        <a href="index.html" class="brand">
+          <img src="../static/images/logo-mark.svg" alt="Tiffin Box" />
+          <span class="brand-name">Tiffin<em>Box</em></span>
+        </a>
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="menu.html">Menu</a>
+          <a href="orders.html">Orders</a>
+          <a href="cart.html" class="active">Cart</a>
+        </nav>
+        <div class="nav-actions">
+          <a href="cart.html" class="cart-link" aria-label="Cart"
+            >🧺<span class="cart-count" data-cart-count>0</span></a
+          >
+          <a href="login.html" class="btn btn-secondary btn-sm">Log in</a>
+          <button type="button" class="btn btn-secondary btn-sm theme-toggle">🌙 Dark</button>
+        </div>
+        <button class="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">Step 1 of 2</span>
+            <h2>Your tiffin so far</h2>
+          </div>
+
+          <div class="cart-layout" data-cart-layout>
+            <div>
+              <div data-cart-list></div>
+              <a href="menu.html" class="btn-ghost">← Add more dishes</a>
+            </div>
+
+            <aside class="summary-card">
+              <h3>Order summary</h3>
+              <div class="summary-line">
+                <span>Subtotal</span><b data-sum-subtotal>₹0</b>
+              </div>
+              <div class="summary-line">
+                <span>Delivery fee</span><b data-sum-delivery>₹0</b>
+              </div>
+              <div class="summary-line">
+                <span>Taxes (5%)</span><b data-sum-tax>₹0</b>
+              </div>
+              <div class="summary-total">
+                <span>Total</span><span data-sum-total>₹0</span>
+              </div>
+              <a
+                href="checkout.html"
+                class="btn btn-primary btn-block"
+                style="margin-top: 20px"
+                data-checkout-btn
+                >Proceed to checkout</a
+              >
+            </aside>
+          </div>
+
+          <div class="empty-state" data-cart-empty style="display: none">
+            <img src="../static/images/empty-tiffin.svg" alt="" width="160" />
+            <h3>Your tiffin is empty</h3>
+            <p>Add a thali, dosa or biryani and it'll show up here.</p>
+            <a href="menu.html" class="btn btn-primary">Browse the menu</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <div class="brand" style="margin-bottom: 14px">
+            <img
+              src="../static/images/logo-mark.svg"
+              alt=""
+              style="width: 26px; height: 32px"
+            />
+            <span class="brand-name">Tiffin<em>Box</em></span>
+          </div>
+          <p>
+            Home-style meals, packed tin by tin and delivered the way your
+            dabbawala always meant it — hot, honest, on time.
+          </p>
+        </div>
+        <div class="footer-col">
+          <h5>Explore</h5>
+          <a href="menu.html">Menu</a>
+          <a href="orders.html">My orders</a>
+          <a href="cart.html">Cart</a>
+        </div>
+        <div class="footer-col">
+          <h5>Account</h5>
+          <a href="login.html">Log in</a>
+          <a href="register.html">Create account</a>
+          <a href="admin_login.html">Admin</a>
+        </div>
+        <div class="footer-col">
+          <h5>Support</h5>
+          <a href="#">Help center</a>
+          <a href="#">Delivery areas</a>
+          <a href="#">Contact us</a>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <span>© 2026 Tiffin Box. All rights reserved.</span>
+        <span>Made with care, tin by tin.</span>
+      </div>
+    </footer>
+
+    <script src="../static/javascript/script.js"></script>
+  </body>
+</html>

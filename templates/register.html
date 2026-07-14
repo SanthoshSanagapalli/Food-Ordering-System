@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Create Account — Tiffin Box</title>
+
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='images/logo-mark.svg') }}"
+      type="image/svg+xml"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+
+  <body>
+    <header class="site-header">
+      <div class="container nav">
+        <a href="{{ url_for('home') }}" class="brand">
+          <img
+            src="{{ url_for('static', filename='images/logo-mark.svg') }}"
+            alt="Tiffin Box"
+          />
+
+          <span class="brand-name"> Tiffin<em>Box</em> </span>
+        </a>
+
+        <nav class="nav-links">
+          <a href="{{ url_for('home') }}"> Home </a>
+
+          <!-- Keep this temporarily until /menu route is created -->
+          <a href="#"> Menu </a>
+        </nav>
+
+        <div class="nav-actions">
+          <!-- Keep this temporarily until /cart route is created -->
+          <a href="#" class="cart-link" aria-label="Cart">
+            🧺
+            <span class="cart-count" data-cart-count> 0 </span>
+          </a>
+
+          <button type="button" class="btn btn-secondary btn-sm theme-toggle">
+            🌙 Dark
+          </button>
+        </div>
+
+        <button class="nav-toggle" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="auth-wrap">
+      <div class="auth-card">
+        <div class="logo-row">
+          <img
+            src="{{ url_for('static', filename='images/logo-mark.svg') }}"
+            alt="Tiffin Box"
+          />
+        </div>
+
+        <h1>Create your account</h1>
+
+        <p class="auth-sub">
+          Join Tiffin Box for faster checkout and order tracking.
+        </p>
+
+        <form method="POST" action="{{ url_for('register') }}" data-validate>
+          <!-- Full Name -->
+
+          <div class="field">
+            <label for="name"> Full name </label>
+
+            <input
+              type="text"
+              id="name"
+              name="full_name"
+              placeholder="e.g. Ananya Rao"
+              required
+            />
+          </div>
+
+          <!-- Email -->
+
+          <div class="field">
+            <label for="email"> Email address </label>
+
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          <!-- Phone -->
+
+          <div class="field">
+            <label for="phone"> Phone number </label>
+
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              placeholder="10-digit mobile"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="address">Delivery address</label>
+            <textarea
+              id="address"
+              name="address"
+              placeholder="Enter your delivery address"
+              required
+            ></textarea>
+          </div>
+          <!-- Password fields -->
+
+          <div class="field-row">
+            <div class="field">
+              <label for="password"> Password </label>
+
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="At least 8 characters"
+                required
+                minlength="8"
+              />
+            </div>
+
+            <div class="field">
+              <label for="confirm_password"> Confirm password </label>
+
+              <input
+                type="password"
+                id="confirm_password"
+                name="confirm_password"
+                placeholder="Re-enter password"
+                required
+                minlength="8"
+              />
+            </div>
+          </div>
+
+          <!-- Terms -->
+
+          <label class="checkbox-row" style="margin-bottom: 18px">
+            <input type="checkbox" required />
+
+            I agree to the terms of service and privacy policy
+          </label>
+
+          <!-- Submit button -->
+
+          <button type="submit" class="btn btn-primary btn-block">
+            Create account
+          </button>
+        </form>
+
+        <div class="divider-or">or</div>
+
+        <p class="form-foot mt-0">
+          Already have an account?
+
+          <a href="{{ url_for('login') }}"> Log in </a>
+        </p>
+      </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='javascript/script.js') }}"></script>
+  </body>
+</html>

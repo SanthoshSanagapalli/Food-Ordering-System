@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Log In — Tiffin Box</title>
+    <link rel="icon" href="../static/images/logo-mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../static/css/style.css" />
+    <style>
+      body {
+        background: var(--ink);
+      }
+      .admin-auth-wrap {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+      }
+      .admin-auth-card {
+        width: 100%;
+        max-width: 400px;
+        background: #2b2117;
+        border: 1px solid #3e3225;
+        border-radius: var(--radius-l);
+        padding: 40px 36px;
+        color: #efe7d8;
+      }
+      .admin-auth-card h1 {
+        color: #fff;
+        text-align: center;
+        font-size: 1.6rem;
+      }
+      .admin-auth-card p {
+        color: #b7ac97;
+        text-align: center;
+      }
+      .admin-auth-card .field label {
+        color: #d8cfbe;
+      }
+      .admin-auth-card .field input {
+        background: #241c15;
+        border-color: #3e3225;
+        color: #fff;
+      }
+      .admin-auth-card .field input:focus {
+        border-color: var(--accent);
+        background: #241c15;
+      }
+      .admin-back {
+        display: block;
+        text-align: center;
+        margin-top: 18px;
+        color: #b7ac97;
+        font-size: 0.85rem;
+      }
+      .admin-back:hover {
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="admin-auth-wrap">
+      <div class="admin-auth-card">
+        <div
+          class="logo-row"
+          style="display: flex; justify-content: center; margin-bottom: 18px"
+        >
+          <img src="../static/images/logo-mark.svg" alt="" width="34" />
+        </div>
+        <div style="display:flex; justify-content:center; margin-bottom:16px; gap:10px;">
+          <button type="button" class="btn btn-secondary btn-sm theme-toggle">🌙 Dark</button>
+        </div>
+        <h1>Kitchen admin</h1>
+        <p>Log in to manage the menu, track orders and run the dashboard.</p>
+
+        <form method="POST" action="/admin/login" data-validate>
+          <div class="field">
+            <label for="admin_email">Admin email</label>
+            <input
+              type="email"
+              id="admin_email"
+              name="email"
+              placeholder="admin@tiffinbox.com"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="admin_password">Password</label>
+            <input
+              type="password"
+              id="admin_password"
+              name="password"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary btn-block"
+            style="margin-top: 10px"
+          >
+            Log in to dashboard
+          </button>
+        </form>
+
+        <a href="index.html" class="admin-back">← Back to customer site</a>
+      </div>
+    </main>
+
+    <script src="../static/javascript/script.js"></script>
+  </body>
+</html>

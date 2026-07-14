@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — Tiffin Box Admin</title>
+    <link rel="icon" href="../static/images/logo-mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../static/css/style.css" />
+  </head>
+  <body data-dashboard>
+    <div class="admin-shell">
+      <aside class="admin-sidebar">
+        <div class="brand">
+          <img
+            src="../static/images/logo-mark.svg"
+            alt=""
+            style="width: 26px; height: 32px"
+          />
+          <span class="brand-name">Tiffin<em>Box</em></span>
+        </div>
+        <nav class="admin-nav">
+          <a href="dashboard.html" class="active">📊 Dashboard</a>
+          <a href="manage_food.html">🍲 Manage food</a>
+          <a href="orders.html">🧾 Orders</a>
+          <a href="admin_login.html">🚪 Log out</a>
+        </nav>
+      </aside>
+
+      <div class="admin-main">
+        <div class="admin-topbar">
+          <h1>Dashboard</h1>
+          <a href="manage_food.html" class="btn btn-primary btn-sm"
+            >+ Add new dish</a
+          >
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <span>Orders today</span>
+            <b>84</b>
+            <span class="delta">▲ 12% vs yesterday</span>
+          </div>
+          <div class="stat-card">
+            <span>Revenue today</span>
+            <b>₹18,240</b>
+            <span class="delta">▲ 8% vs yesterday</span>
+          </div>
+          <div class="stat-card">
+            <span>Dishes on menu</span>
+            <b data-stat-dishes>12</b>
+            <span class="delta" style="color: var(--steel)"
+              >Across 6 categories</span
+            >
+          </div>
+          <div class="stat-card">
+            <span>Out of stock</span>
+            <b data-stat-oos>0</b>
+            <span class="delta" style="color: var(--danger)"
+              >Needs restocking</span
+            >
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Recent orders</h3>
+            <a href="orders.html" class="btn-ghost">View all →</a>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="order-id">#TB-10482</td>
+                <td>Ananya Rao</td>
+                <td>South Thali, Masala Chai</td>
+                <td class="price">₹218</td>
+                <td><span class="status-token status-otw">On the way</span></td>
+              </tr>
+              <tr>
+                <td class="order-id">#TB-10481</td>
+                <td>Kiran Kumar</td>
+                <td>Chicken Biryani</td>
+                <td class="price">₹249</td>
+                <td>
+                  <span class="status-token status-preparing">Preparing</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="order-id">#TB-10480</td>
+                <td>Divya Sharma</td>
+                <td>Masala Dosa ×2</td>
+                <td class="price">₹198</td>
+                <td><span class="status-token status-placed">Placed</span></td>
+              </tr>
+              <tr>
+                <td class="order-id">#TB-10471</td>
+                <td>Rahul Verma</td>
+                <td>Chicken Biryani, Gulab Jamun ×2</td>
+                <td class="price">₹387</td>
+                <td>
+                  <span class="status-token status-delivered">Delivered</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script src="../static/javascript/script.js"></script>
+  </body>
+</html>
