@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard — Tiffin Box Admin</title>
-    <link rel="icon" href="../static/images/logo-mark.svg" type="image/svg+xml" />
+    <link
+      rel="icon"
+      href="../static/images/logo-mark.svg"
+      type="image/svg+xml"
+    />
     <link rel="stylesheet" href="../static/css/style.css" />
   </head>
   <body data-dashboard>
@@ -22,7 +26,7 @@
           <a href="dashboard.html" class="active">📊 Dashboard</a>
           <a href="manage_food.html">🍲 Manage food</a>
           <a href="orders.html">🧾 Orders</a>
-          <a href="admin_login.html">🚪 Log out</a>
+          <a href="{{ url_for('admin_logout') }}">Logout</a>
         </nav>
       </aside>
 

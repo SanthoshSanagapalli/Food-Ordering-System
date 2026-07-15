@@ -4,8 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Log In — Tiffin Box</title>
-    <link rel="icon" href="../static/images/logo-mark.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="../static/css/style.css" />
+    <link
+      rel="icon"
+      href="../static/images/logo-mark.svg"
+      type="image/svg+xml"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
     <style>
       body {
         background: var(--ink);
@@ -66,15 +73,28 @@
           class="logo-row"
           style="display: flex; justify-content: center; margin-bottom: 18px"
         >
-          <img src="../static/images/logo-mark.svg" alt="" width="34" />
+          <img
+            src="{{ url_for('static', filename='images/logo-mark.svg') }}"
+            alt="error"
+            width="34"
+          />
         </div>
-        <div style="display:flex; justify-content:center; margin-bottom:16px; gap:10px;">
-          <button type="button" class="btn btn-secondary btn-sm theme-toggle">🌙 Dark</button>
+        <div
+          style="
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+            gap: 10px;
+          "
+        >
+          <button type="button" class="btn btn-secondary btn-sm theme-toggle">
+            🌙 Dark
+          </button>
         </div>
         <h1>Kitchen admin</h1>
         <p>Log in to manage the menu, track orders and run the dashboard.</p>
 
-        <form method="POST" action="/admin/login" data-validate>
+        <form method="POST" action="{{url_for('admin_login')}}" data-validate>
           <div class="field">
             <label for="admin_email">Admin email</label>
             <input
@@ -104,10 +124,12 @@
           </button>
         </form>
 
-        <a href="index.html" class="admin-back">← Back to customer site</a>
+        <a href="{{url_for('home')}}" class="admin-back"
+          >← Back to customer site</a
+        >
       </div>
     </main>
 
-    <script src="../static/javascript/script.js"></script>
+    <script src="{{ url_for('static', filename='javascript/script.js') }}"></script>
   </body>
 </html>

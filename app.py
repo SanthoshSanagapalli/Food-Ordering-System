@@ -96,8 +96,60 @@ def login():
 
 @app.route("/logout")
 def logout():
-    session.clear()
+    session.pop("user_id", None)
+    session.pop("user_name", None)
     return redirect(url_for("home"))
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+
+    if request.method == "POST":
+
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        con = get_connection()
+        cmd = con.cursor(dictionary=True)
+
+        cmd.execute(
+            "SELECT * FROM admins WHERE email = %s",
+            (email,)
+        )
+
+        admin = cmd.fetchone()
+
+        cmd.close()
+        con.close()
+
+        if admin is not None and check_password_hash(
+            admin["password"], password
+        ):
+            session["admin_id"] = admin["admin_id"]
+            session["admin_email"] = admin["email"]
+
+            return redirect(url_for("admin_dashboard"))
+
+        return "Invalid admin email or password"
+
+    return render_template("admin_login.html")
+
+
+@app.route("/admin/dashboard")
+def admin_dashboard():
+
+    if "admin_id" not in session:
+        return redirect(url_for("admin_login"))
+
+    return render_template("dashboard.html")
+
+
+@app.route("/admin/logout")
+def admin_logout():
+
+    session.pop("admin_id", None)
+    session.pop("admin_email", None)
+
+    return redirect(url_for("admin_login"))
 
 
 if __name__ == "__main__":
