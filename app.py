@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session, url_for,jsonify
 from werkzeug.security import generate_password_hash,check_password_hash
 from dbconnection import get_connection
 
@@ -13,7 +13,7 @@ def home():
     return render_template("index.html")
 
 
-# User registration
+#API for User registration
 @app.route("/register", methods=["GET", "POST"])
 def register():
 
@@ -71,7 +71,7 @@ def register():
     return render_template("register.html")
 
 
-
+#API for User login
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -94,12 +94,14 @@ def login():
         
     return render_template("login.html")
 
+#API for user logout
 @app.route("/logout")
 def logout():
     session.pop("user_id", None)
     session.pop("user_name", None)
     return redirect(url_for("home"))
 
+#API for admin login
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
 
@@ -133,7 +135,7 @@ def admin_login():
 
     return render_template("admin_login.html")
 
-
+#API to remove the session of the admin 
 @app.route("/admin/dashboard")
 def admin_dashboard():
 
@@ -142,7 +144,7 @@ def admin_dashboard():
 
     return render_template("dashboard.html")
 
-
+#API for admin logout
 @app.route("/admin/logout")
 def admin_logout():
 
@@ -150,6 +152,40 @@ def admin_logout():
     session.pop("admin_email", None)
 
     return redirect(url_for("admin_login"))
+
+
+#API for the menu page
+@app.route("/menu")
+def menu():
+    con = get_connection()
+    cmd = con.cursor(dictionary=True)
+    cmd.execute("SELECT * FROM food_items WHERE availability='Available'")
+    foods = cmd.fetchall()
+    con.commit()
+    cmd.close()
+    con.close()
+
+    return render_template("menu.html")
+@app.route("/api/menu")
+def api_menu():
+    con = get_connection()
+    cmd = con.cursor(dictionary=True)
+    cmd.execute("""
+        SELECT
+            food_id,
+            food_name,
+            category,
+            description,
+            price,
+            image,
+            availability
+        FROM food_items
+        WHERE availability = 'Available'
+    """)
+    foods = cmd.fetchall()
+    cmd.close()
+    con.close()
+    return jsonify(foods)
 
 
 if __name__ == "__main__":

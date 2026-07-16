@@ -1,125 +1,4 @@
-const FOOD_ITEMS = [
-  {
-    id: "f1",
-    name: "South Thali",
-    category: "thali",
-    veg: true,
-    price: 189,
-    tag: "Bestseller",
-    icon: "thali.jpeg",
-    desc: "Rice, sambar, rasam, two curries, curd & papad.",
-  },
-  {
-    id: "f2",
-    name: "Paneer Butter Masala Thali",
-    category: "thali",
-    veg: true,
-    price: 219,
-    tag: "Chef's pick",
-    icon: "panner-butter-masala.jpeg",
-    desc: "Paneer curry, dal, jeera rice, roti & salad.",
-  },
-  {
-    id: "f3",
-    name: "Masala Dosa",
-    category: "dosa",
-    veg: true,
-    price: 99,
-    tag: "Crispy",
-    icon: "dosa.jpeg",
-    desc: "Crisp rice crepe, spiced potato filling, chutneys.",
-  },
-  {
-    id: "f4",
-    name: "Rava Dosa",
-    category: "dosa",
-    veg: true,
-    price: 109,
-    tag: "Light",
-    icon: "ravadosa.jpeg",
-    desc: "Semolina crepe, onions, served with sambar.",
-  },
-  {
-    id: "f5",
-    name: "Chicken Biryani",
-    category: "biryani",
-    veg: false,
-    price: 249,
-    tag: "Spicy",
-    icon: "biryani.jpeg",
-    desc: "Slow-cooked basmati, tender chicken, raita.",
-  },
-  {
-    id: "f6",
-    name: "Veg Dum Biryani",
-    category: "biryani",
-    veg: true,
-    price: 189,
-    tag: "Aromatic",
-    icon: "vegdum.jpeg",
-    desc: "Layered rice, garden vegetables, fried onions.",
-  },
-  {
-    id: "f7",
-    name: "Samosa (2 pc)",
-    category: "snacks",
-    veg: true,
-    price: 49,
-    tag: "Snack",
-    icon: "samosa.jpeg",
-    desc: "Golden pastry, spiced potato & pea filling.",
-  },
-  {
-    id: "f8",
-    name: "Onion Pakora",
-    category: "snacks",
-    veg: true,
-    price: 59,
-    tag: "Crispy",
-    icon: "onionpakoda.jpeg",
-    desc: "Sliced onions in gram-flour batter, fried fresh.",
-  },
-  {
-    id: "f9",
-    name: "Gulab Jamun (2 pc)",
-    category: "dessert",
-    veg: true,
-    price: 69,
-    tag: "Sweet",
-    icon: "gulabjamun.jpeg",
-    desc: "Soft milk dumplings soaked in cardamom syrup.",
-  },
-  {
-    id: "f10",
-    name: "Rasmalai",
-    category: "dessert",
-    veg: true,
-    price: 79,
-    tag: "Chilled",
-    icon: "rasmalai.jpeg",
-    desc: "Paneer discs in saffron-scented reduced milk.",
-  },
-  {
-    id: "f11",
-    name: "Masala Chai",
-    category: "beverage",
-    veg: true,
-    price: 29,
-    tag: "Hot",
-    icon: "masalachai.jpeg",
-    desc: "Spiced tea brewed with milk and ginger.",
-  },
-  {
-    id: "f12",
-    name: "Sweet Lassi",
-    category: "beverage",
-    veg: true,
-    price: 59,
-    tag: "Chilled",
-    icon: "sweet lassi.jpeg",
-    desc: "Churned yogurt, sugar, a touch of cardamom.",
-  },
-];
+let FOOD_ITEMS = [];
 
 const CATEGORIES = [
   { id: "thali", label: "Thalis", icon: "icon-thali.svg" },
@@ -269,6 +148,37 @@ function foodCardHTML(item) {
       </div>
     </div>
   </article>`;
+}
+
+async function loadFoodItems() {
+  try {
+    const response = await fetch("/api/menu");
+
+    const data = await response.json();
+
+    FOOD_ITEMS = data.map((food) => ({
+      id: "f" + food.food_id,
+
+      name: food.food_name,
+
+      category: food.category,
+
+      price: Number(food.price),
+
+      desc: food.description,
+
+      icon: food.image,
+
+      veg: food.veg,
+
+      tag: food.availability,
+    }));
+    console.log(data);
+
+    renderMenu();
+  } catch (error) {
+    console.log("Error:", error);
+  }
 }
 
 function renderMenu() {
@@ -609,7 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initNav();
   initTheme();
   renderCategoryStrip();
-  renderMenu();
+  loadFoodItems();
   renderCartPage();
   renderCheckoutSummary();
   renderManageFood();
