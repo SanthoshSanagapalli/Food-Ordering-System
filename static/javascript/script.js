@@ -60,12 +60,41 @@ function saveCart(cart) {
 function cartCount(cart) {
   return Object.values(cart).reduce((a, b) => a + b, 0);
 }
-function addToCart(id, qty = 1) {
-  const cart = getCart();
-  cart[id] = (cart[id] || 0) + qty;
-  if (cart[id] <= 0) delete cart[id];
-  saveCart(cart);
+
+async function addToCart(id, qty = 1) {
+  try {
+    const foodId = Number(id.replace("f", ""));
+
+    const response = await fetch("/api/cart/add", {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        food_id: foodId,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      const cart = getCart();
+
+      cart[id] = (cart[id] || 0) + qty;
+
+      if (cart[id] <= 0) delete cart[id];
+
+      saveCart(cart);
+    } else {
+      alert(result.message);
+    }
+  } catch (error) {
+    console.log(error);
+  }
 }
+
 function setCartQty(id, qty) {
   const cart = getCart();
   if (qty <= 0) delete cart[id];

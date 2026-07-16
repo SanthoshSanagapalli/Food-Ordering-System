@@ -187,6 +187,124 @@ def api_menu():
     con.close()
     return jsonify(foods)
 
+@app.route("/api/cart/add", methods=["POST"])
+def add_to_cart():
+
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login first."
+        }), 401
+
+    user_id = session["user_id"]
+    data = request.get_json()
+    food_id = data.get("food_id")
+
+    con = get_connection()
+    cmd = con.cursor(dictionary=True)
+
+    # Check whether the user already has a cart
+    cmd.execute("SELECT * FROM cart WHERE user_id=%s",(user_id,))
+    cart = cmd.fetchone()
+
+    # Create a cart if it doesn't exist
+    if cart is None:
+        cmd.execute("INSERT INTO cart(user_id) VALUES(%s)",(user_id,))
+        con.commit()
+        cart_id = cmd.lastrowid
+
+    else:
+        cart_id = cart["cart_id"]
+
+    # Check whether the food is already in the cart
+    cmd.execute(
+        """
+        SELECT *
+        FROM cart_items
+        WHERE cart_id=%s AND food_id=%s
+        """,
+        (cart_id, food_id))
+    
+    item = cmd.fetchone()
+    if item:
+        cmd.execute(
+            """
+            UPDATE cart_items
+            SET quantity = quantity + 1
+            WHERE cart_item_id=%s
+            """,
+            (item["cart_item_id"],)
+        )
+    else:
+        cmd.execute(
+            """
+            INSERT INTO cart_items(cart_id, food_id, quantity)
+            VALUES(%s,%s,1)
+            """,
+            (cart_id, food_id)
+        )
+
+    con.commit()
+
+    cmd.close()
+    con.close()
+    return jsonify({
+        "success": True,
+        "message": "Added to cart"
+    })
+
+@app.route("/api/cart", methods=["GET"])
+def get_cart():
+
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login first."
+        }), 401
+
+    user_id = session["user_id"]
+
+    con = get_connection()
+    cmd = con.cursor(dictionary=True)
+
+    cmd.execute("""
+        SELECT cart_id
+        FROM cart
+        WHERE user_id = %s
+    """, (user_id,))
+
+    cart = cmd.fetchone()
+
+    if cart is None:
+
+        cmd.close()
+        con.close()
+
+        return jsonify([])
+
+    cart_id = cart["cart_id"]
+
+    cmd.execute("""
+        SELECT
+            ci.cart_item_id,
+            ci.food_id,
+            fi.food_name,
+            fi.description,
+            fi.price,
+            fi.image,
+            ci.quantity
+        FROM cart_items ci
+        JOIN food_items fi
+            ON ci.food_id = fi.food_id
+        WHERE ci.cart_id = %s
+    """, (cart_id,))
+
+    items = cmd.fetchall()
+
+    cmd.close()
+    con.close()
+
+    return jsonify(items)
 
 if __name__ == "__main__":
     app.run(debug=True) 
