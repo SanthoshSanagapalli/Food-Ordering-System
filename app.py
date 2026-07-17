@@ -12,7 +12,18 @@ app.secret_key = "abc"
 def home():
     return render_template("index.html")
 
+@app.route("/cart")
+def cart():
+    return render_template("cart.html")
 
+
+@app.route("/orders")
+def orders():
+    return render_template("orders.html")
+
+@app.route("/checkout")
+def checkout():
+    return render_template("checkout.html")
 #API for User registration
 @app.route("/register", methods=["GET", "POST"])
 def register():

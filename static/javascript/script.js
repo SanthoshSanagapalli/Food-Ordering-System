@@ -274,76 +274,91 @@ function renderMenu() {
   draw();
 }
 
+async function getDatabaseCart() {
+  const response = await fetch("/api/cart");
+
+  const data = await response.json();
+
+  return data;
+}
 /* ---------- cart page ---------- */
-function renderCartPage() {
+async function renderCartPage() {
   const list = document.querySelector("[data-cart-list]");
   if (!list) return;
+
   const summary = {
     subtotal: document.querySelector("[data-sum-subtotal]"),
     delivery: document.querySelector("[data-sum-delivery]"),
     tax: document.querySelector("[data-sum-tax]"),
     total: document.querySelector("[data-sum-total]"),
   };
+
   const checkoutBtn = document.querySelector("[data-checkout-btn]");
   const emptyState = document.querySelector("[data-cart-empty]");
   const layout = document.querySelector("[data-cart-layout]");
 
-  function draw() {
-    const cart = getCart();
-    const entries = Object.entries(cart).filter(([, q]) => q > 0);
-    if (!entries.length) {
+  async function draw() {
+    const response = await fetch("/api/cart");
+    const items = await response.json();
+
+    if (items.length === 0) {
       if (layout) layout.style.display = "none";
       if (emptyState) emptyState.style.display = "block";
       return;
     }
+
     if (layout) layout.style.display = "";
     if (emptyState) emptyState.style.display = "none";
 
     let subtotal = 0;
-    list.innerHTML = entries
-      .map(([id, qty]) => {
-        const item = FOOD_ITEMS.find((f) => f.id === id);
-        if (!item) return "";
-        subtotal += item.price * qty;
+
+    list.innerHTML = items
+      .map((item) => {
+        subtotal += item.price * item.quantity;
+
         return `
-        <div class="cart-row" data-id="${id}">
-          <div class="thumb"><img src="${IMG_BASE}${item.icon}" alt="${item.name}" /></div>
-          <div>
-            <h4>${item.name}</h4>
-            <span class="unit">₹${item.price} each</span>
-          </div>
-          <div class="qty-control">
-            <button type="button" data-action="dec">−</button>
-            <input type="text" value="${qty}" readonly />
-            <button type="button" data-action="inc">+</button>
-          </div>
-          <span class="price">₹${item.price * qty}</span>
-          <button type="button" class="remove-btn" data-action="remove" aria-label="Remove">✕</button>
-        </div>`;
+      <div class="cart-row" data-id="${item.food_id}">
+        <div class="thumb">
+          <img src="${IMG_BASE}${item.image}" alt="${item.food_name}" />
+        </div>
+
+        <div>
+          <h4>${item.food_name}</h4>
+          <span class="unit">₹${item.price} each</span>
+        </div>
+
+        <div class="qty-control">
+          <button type="button" data-action="dec">−</button>
+          <input type="text" value="${item.quantity}" readonly />
+          <button type="button" data-action="inc">+</button>
+        </div>
+
+        <span class="price">
+          ₹${item.price * item.quantity}
+        </span>
+
+        <button
+          type="button"
+          class="remove-btn"
+          data-action="remove">
+          ✕
+        </button>
+      </div>
+      `;
       })
       .join("");
 
     const delivery = subtotal > 0 ? DELIVERY_FEE : 0;
     const tax = Math.round(subtotal * TAX_RATE);
     const total = subtotal + delivery + tax;
-    if (summary.subtotal) summary.subtotal.textContent = `₹${subtotal}`;
-    if (summary.delivery) summary.delivery.textContent = `₹${delivery}`;
-    if (summary.tax) summary.tax.textContent = `₹${tax}`;
-    if (summary.total) summary.total.textContent = `₹${total}`;
-    if (checkoutBtn) checkoutBtn.toggleAttribute("disabled", subtotal === 0);
-  }
 
-  list.addEventListener("click", (e) => {
-    const row = e.target.closest(".cart-row");
-    if (!row) return;
-    const id = row.dataset.id;
-    const action = e.target.dataset.action;
-    const cart = getCart();
-    if (action === "inc") setCartQty(id, (cart[id] || 0) + 1);
-    if (action === "dec") setCartQty(id, (cart[id] || 0) - 1);
-    if (action === "remove") removeFromCart(id);
-    draw();
-  });
+    summary.subtotal.textContent = `₹${subtotal}`;
+    summary.delivery.textContent = `₹${delivery}`;
+    summary.tax.textContent = `₹${tax}`;
+    summary.total.textContent = `₹${total}`;
+
+    checkoutBtn.toggleAttribute("disabled", subtotal === 0);
+  }
 
   draw();
 }
