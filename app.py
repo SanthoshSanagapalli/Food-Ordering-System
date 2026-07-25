@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash,check_password_hash
 from dbconnection import get_connection
 
 
-app = Flask("__name__")
+app = Flask(__name__)
 app.secret_key = "abc"
 
 
@@ -14,7 +14,7 @@ def home():
 
 @app.route("/cart")
 def cart():
-    return render_template("cart.html")
+    return render_template("cart.html")     
 
 
 @app.route("/orders")
@@ -168,15 +168,8 @@ def admin_logout():
 #API for the menu page
 @app.route("/menu")
 def menu():
-    con = get_connection()
-    cmd = con.cursor(dictionary=True)
-    cmd.execute("SELECT * FROM food_items WHERE availability='Available'")
-    foods = cmd.fetchall()
-    con.commit()
-    cmd.close()
-    con.close()
-
     return render_template("menu.html")
+
 @app.route("/api/menu")
 def api_menu():
     con = get_connection()
@@ -316,6 +309,422 @@ def get_cart():
     con.close()
 
     return jsonify(items)
+
+@app.route("/api/cart/update", methods=["POST"])
+def update_cart():
+
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login first."
+        }), 401
+
+    user_id = session["user_id"]
+    data = request.get_json()
+
+    food_id = data.get("food_id")
+    action = data.get("action")      # "increase" or "decrease"
+
+    con = get_connection()
+    cmd = con.cursor(dictionary=True)
+
+    # Find the user's cart
+    cmd.execute(
+        "SELECT cart_id FROM cart WHERE user_id=%s",
+        (user_id,)
+    )
+    cart = cmd.fetchone()
+
+    if not cart:
+        cmd.close()
+        con.close()
+        return jsonify({
+            "success": False,
+            "message": "Cart not found."
+        }), 404
+
+    cart_id = cart["cart_id"]
+
+    # Find the cart item
+    cmd.execute(
+        """
+        SELECT *
+        FROM cart_items
+        WHERE cart_id=%s AND food_id=%s
+        """,
+        (cart_id, food_id)
+    )
+
+    item = cmd.fetchone()
+
+    if not item:
+        cmd.close()
+        con.close()
+        return jsonify({
+            "success": False,
+            "message": "Item not found."
+        }), 404
+
+    # Increase quantity
+    if action == "increase":
+        cmd.execute(
+            """
+            UPDATE cart_items
+            SET quantity = quantity + 1
+            WHERE cart_item_id=%s
+            """,
+            (item["cart_item_id"],)
+        )
+
+    # Decrease quantity
+    elif action == "decrease":
+
+        if item["quantity"] > 1:
+
+            cmd.execute(
+                """
+                UPDATE cart_items
+                SET quantity = quantity - 1
+                WHERE cart_item_id=%s
+                """,
+                (item["cart_item_id"],)
+            )
+
+        else:
+            cmd.execute(
+                """
+                DELETE FROM cart_items
+                WHERE cart_item_id=%s
+                """,
+                (item["cart_item_id"],)
+            )
+
+    con.commit()
+
+    cmd.close()
+    con.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Cart updated successfully."
+    })
+
+@app.route("/api/cart/remove", methods=["POST"])
+def remove_from_cart():
+
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login first."
+        }), 401
+
+    user_id = session["user_id"]
+    data = request.get_json()
+
+    food_id = data.get("food_id")
+
+    con = get_connection()
+    cmd = con.cursor(dictionary=True)
+
+    cmd.execute(
+        "SELECT cart_id FROM cart WHERE user_id=%s",
+        (user_id,)
+    )
+
+    cart = cmd.fetchone()
+
+    if not cart:
+        cmd.close()
+        con.close()
+        return jsonify({
+            "success": False,
+            "message": "Cart not found."
+        }), 404
+
+    cmd.execute(
+        """
+        DELETE FROM cart_items
+        WHERE cart_id=%s AND food_id=%s
+        """,
+        (cart["cart_id"], food_id)
+    )
+
+    con.commit()
+
+    cmd.close()
+    con.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Item removed successfully."
+    })
+
+@app.route("/api/user")
+def get_user():
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login first."
+        }), 401
+
+    user_id = session["user_id"]
+
+    con = get_connection()
+    cmd = con.cursor(dictionary=True)
+
+    cmd.execute("""
+        SELECT full_name, phone, address
+        FROM users
+        WHERE user_id=%s
+    """, (user_id,))
+
+    user = cmd.fetchone()
+
+    cmd.close()
+    con.close()
+
+    return jsonify(user)
+
+@app.route("/api/place-order", methods=["POST"])
+def place_order():
+
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login first."
+        }), 401
+
+    user_id = session["user_id"]
+
+    con = get_connection()
+    cmd = con.cursor(dictionary=True)
+
+    # Get the user's cart
+    cmd.execute(
+        """
+        SELECT cart_id
+        FROM cart
+        WHERE user_id=%s
+        """,
+        (user_id,)
+    )
+
+    cart = cmd.fetchone()
+
+    if not cart:
+        cmd.close()
+        con.close()
+        return jsonify({
+            "success": False,
+            "message": "Cart not found."
+        }), 404
+
+    cart_id = cart["cart_id"]
+
+    # Get all cart items
+    cmd.execute(
+        """
+        SELECT
+            ci.food_id,
+            ci.quantity,
+            f.price
+        FROM cart_items ci
+        JOIN food_items f
+            ON ci.food_id = f.food_id
+        WHERE ci.cart_id=%s
+        """,
+        (cart_id,)
+    )
+
+    cart_items = cmd.fetchall()
+
+    if not cart_items:
+        cmd.close()
+        con.close()
+        return jsonify({
+            "success": False,
+            "message": "Your cart is empty."
+        }), 400
+
+    # Calculate total amount
+    # Calculate total amount
+    total_amount = 0
+
+    for item in cart_items:
+        total_amount += item["price"] * item["quantity"]
+
+    # Insert order into orders table
+    cmd.execute(
+        """
+        INSERT INTO orders(user_id, total_amount)
+        VALUES(%s, %s)
+        """,
+        (user_id, total_amount)
+    )
+
+    con.commit()
+
+    order_id = cmd.lastrowid
+    for item in cart_items:
+        cmd.execute(
+        """
+        INSERT INTO order_items(order_id, food_id, quantity, price)
+        VALUES(%s, %s, %s, %s)
+        """,
+        (
+            order_id,
+            item["food_id"],
+            item["quantity"],
+            item["price"]
+        )
+    )
+
+    con.commit()
+    # Clear all items from the cart
+    cmd.execute(
+        """
+        DELETE FROM cart_items
+        WHERE cart_id=%s
+        """,
+        (cart_id,)
+    )
+
+    con.commit()
+    return jsonify({
+        "success": True,
+        "order_id": order_id,
+        "total_amount": float(total_amount)
+    })
+
+@app.route("/api/orders", methods=["GET"])
+def get_orders():
+
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login first."
+        }), 401
+
+    user_id = session["user_id"]
+
+    con = get_connection()
+    cmd = con.cursor(dictionary=True)
+
+    cmd.execute("""
+    SELECT
+        o.order_id,
+        o.total_amount,
+        o.status,
+        o.order_date,
+        oi.quantity,
+        f.food_name
+    FROM orders o
+    JOIN order_items oi
+        ON o.order_id = oi.order_id
+    JOIN food_items f
+        ON oi.food_id = f.food_id
+    WHERE o.user_id = %s
+    ORDER BY o.order_date DESC
+""", (user_id,))
+    orders = cmd.fetchall()
+    grouped_orders = {}
+
+    for row in orders:
+
+        order_id = row["order_id"]
+
+        if order_id not in grouped_orders:
+            grouped_orders[order_id] = {
+                "order_id": order_id,
+                "total_amount": float(row["total_amount"]),
+                "status": row["status"],
+                "order_date": row["order_date"],
+                "items": []
+            }
+
+        grouped_orders[order_id]["items"].append({
+            "food_name": row["food_name"],
+            "quantity": row["quantity"]
+        })
+    cmd.close()
+    con.close()
+
+    return jsonify(list(grouped_orders.values()))
+
+
+@app.route("/api/admin/orders", methods=["GET"])
+def admin_orders():
+
+    if "admin_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login as admin."
+        }), 401
+
+    con = get_connection()
+    cmd = con.cursor(dictionary=True)
+
+    cmd.execute("""
+        SELECT
+            o.order_id,
+            o.total_amount,
+            o.status,
+            o.order_date,
+            u.full_name,
+            oi.quantity,
+            f.food_name
+        FROM orders o
+        JOIN users u
+            ON o.user_id = u.user_id
+        JOIN order_items oi
+            ON o.order_id = oi.order_id
+        JOIN food_items f
+            ON oi.food_id = f.food_id
+        ORDER BY o.order_date DESC
+    """)
+
+    rows = cmd.fetchall()
+
+    grouped_orders = {}
+
+    for row in rows:
+
+        order_id = row["order_id"]
+
+        if order_id not in grouped_orders:
+            grouped_orders[order_id] = {
+                "order_id": order_id,
+                "customer": row["full_name"],
+                "total_amount": float(row["total_amount"]),
+                "status": row["status"],
+                "order_date": row["order_date"],
+                "items": []
+            }
+
+        grouped_orders[order_id]["items"].append({
+            "food_name": row["food_name"],
+            "quantity": row["quantity"]
+        })
+
+    cmd.close()
+    con.close()
+
+    return jsonify(list(grouped_orders.values()))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True) 

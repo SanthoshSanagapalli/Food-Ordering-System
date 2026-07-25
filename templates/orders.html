@@ -25,10 +25,24 @@
           <a href="/cart">Cart</a>
         </nav>
         <div class="nav-actions">
-          <a href="cart.html" class="cart-link" aria-label="Cart"
+          <a href="/cart" class="cart-link" aria-label="Cart"
             >🧺<span class="cart-count" data-cart-count>0</span></a
           >
-          <a href="login.html" class="btn btn-secondary btn-sm">Log in</a>
+
+          {%if session.get("user_id")%}
+          <span class="user-name"> 👤 {{ session.get("user_name") }} </span>
+
+          <a href="{{ url_for('logout') }}" class="btn btn-secondary btn-sm">
+            Logout
+          </a>
+
+          {% else %}
+
+          <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">
+            Log in
+          </a>
+
+          {% endif %}
           <button type="button" class="btn btn-secondary btn-sm theme-toggle">
             🌙 Dark
           </button>
@@ -46,76 +60,7 @@
             <span class="eyebrow">Track your tiffin</span>
             <h2>Your orders</h2>
           </div>
-
-          <div class="order-card">
-            <div class="order-top">
-              <div class="order-id">
-                #TB-10482<small>Placed today, 12:04 PM</small>
-              </div>
-              <span class="status-token status-otw">On the way</span>
-            </div>
-            <p class="order-items">
-              1× South Thali, 1× Masala Chai — <strong>₹218</strong>
-            </p>
-            <div class="order-track">
-              <div class="pt done">
-                <div class="dot"></div>
-                <span>Placed</span>
-              </div>
-              <div class="pt done">
-                <div class="dot"></div>
-                <span>Preparing</span>
-              </div>
-              <div class="pt done">
-                <div class="dot"></div>
-                <span>On the way</span>
-              </div>
-              <div class="pt">
-                <div class="dot"></div>
-                <span>Delivered</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="order-card">
-            <div class="order-top">
-              <div class="order-id">
-                #TB-10471<small>Yesterday, 8:41 PM</small>
-              </div>
-              <span class="status-token status-delivered">Delivered</span>
-            </div>
-            <p class="order-items">
-              1× Chicken Biryani, 2× Gulab Jamun — <strong>₹387</strong>
-            </p>
-            <div class="order-track">
-              <div class="pt done">
-                <div class="dot"></div>
-                <span>Placed</span>
-              </div>
-              <div class="pt done">
-                <div class="dot"></div>
-                <span>Preparing</span>
-              </div>
-              <div class="pt done">
-                <div class="dot"></div>
-                <span>On the way</span>
-              </div>
-              <div class="pt done">
-                <div class="dot"></div>
-                <span>Delivered</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="order-card">
-            <div class="order-top">
-              <div class="order-id">
-                #TB-10390<small>3 days ago, 1:15 PM</small>
-              </div>
-              <span class="status-token status-cancelled">Cancelled</span>
-            </div>
-            <p class="order-items">2× Masala Dosa — <strong>₹198</strong></p>
-          </div>
+          <div data-orders-list></div>
         </div>
       </section>
     </main>

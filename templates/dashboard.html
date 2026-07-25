@@ -25,7 +25,7 @@
         <nav class="admin-nav">
           <a href="dashboard.html" class="active">📊 Dashboard</a>
           <a href="manage_food.html">🍲 Manage food</a>
-          <a href="orders.html">🧾 Orders</a>
+          <a href="/orders">🧾 Orders</a>
           <a href="{{ url_for('admin_logout') }}">Logout</a>
         </nav>
       </aside>
@@ -80,45 +80,11 @@
                 <th>Status</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td class="order-id">#TB-10482</td>
-                <td>Ananya Rao</td>
-                <td>South Thali, Masala Chai</td>
-                <td class="price">₹218</td>
-                <td><span class="status-token status-otw">On the way</span></td>
-              </tr>
-              <tr>
-                <td class="order-id">#TB-10481</td>
-                <td>Kiran Kumar</td>
-                <td>Chicken Biryani</td>
-                <td class="price">₹249</td>
-                <td>
-                  <span class="status-token status-preparing">Preparing</span>
-                </td>
-              </tr>
-              <tr>
-                <td class="order-id">#TB-10480</td>
-                <td>Divya Sharma</td>
-                <td>Masala Dosa ×2</td>
-                <td class="price">₹198</td>
-                <td><span class="status-token status-placed">Placed</span></td>
-              </tr>
-              <tr>
-                <td class="order-id">#TB-10471</td>
-                <td>Rahul Verma</td>
-                <td>Chicken Biryani, Gulab Jamun ×2</td>
-                <td class="price">₹387</td>
-                <td>
-                  <span class="status-token status-delivered">Delivered</span>
-                </td>
-              </tr>
-            </tbody>
+            <tbody data-dashboard-orders></tbody>
           </table>
         </div>
       </div>
     </div>
-
     <script src="../static/javascript/script.js"></script>
   </body>
 </html>

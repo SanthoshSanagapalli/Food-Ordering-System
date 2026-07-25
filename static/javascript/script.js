@@ -53,10 +53,12 @@ function getCart() {
     return {};
   }
 }
+
 function saveCart(cart) {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
   updateCartBadge();
 }
+
 function cartCount(cart) {
   return Object.values(cart).reduce((a, b) => a + b, 0);
 }
@@ -101,11 +103,13 @@ function setCartQty(id, qty) {
   else cart[id] = qty;
   saveCart(cart);
 }
+
 function removeFromCart(id) {
   const cart = getCart();
   delete cart[id];
   saveCart(cart);
 }
+
 function updateCartBadge() {
   const el = document.querySelector("[data-cart-count]");
   if (!el) return;
@@ -281,6 +285,7 @@ async function getDatabaseCart() {
 
   return data;
 }
+
 /* ---------- cart page ---------- */
 async function renderCartPage() {
   const list = document.querySelector("[data-cart-list]");
@@ -299,6 +304,12 @@ async function renderCartPage() {
 
   async function draw() {
     const response = await fetch("/api/cart");
+
+    if (response.status === 401) {
+      window.location.href = "/login";
+      return;
+    }
+
     const items = await response.json();
 
     if (items.length === 0) {
@@ -361,21 +372,87 @@ async function renderCartPage() {
   }
 
   draw();
+  draw();
+
+  list.addEventListener("click", async (e) => {
+    const button = e.target.closest("button");
+    if (!button) return;
+
+    const row = button.closest(".cart-row");
+    const foodId = Number(row.dataset.id);
+
+    // Increase quantity
+    if (button.dataset.action === "inc") {
+      await fetch("/api/cart/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          food_id: foodId,
+          action: "increase",
+        }),
+      });
+
+      draw();
+    }
+
+    // Decrease quantity
+    if (button.dataset.action === "dec") {
+      await fetch("/api/cart/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          food_id: foodId,
+          action: "decrease",
+        }),
+      });
+
+      draw();
+    }
+
+    // Remove item
+    if (button.dataset.action === "remove") {
+      await fetch("/api/cart/remove", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          food_id: foodId,
+        }),
+      });
+
+      draw();
+    }
+  });
 }
 
 /* ---------- checkout page ---------- */
-function renderCheckoutSummary() {
+async function renderCheckoutSummary() {
   const box = document.querySelector("[data-checkout-summary]");
   if (!box) return;
-  const cart = getCart();
-  const entries = Object.entries(cart).filter(([, q]) => q > 0);
+  const response = await fetch("/api/cart");
+
+  if (response.status === 401) {
+    window.location.href = "/login";
+    return;
+  }
+
+  const items = await response.json();
   let subtotal = 0;
-  const rows = entries
-    .map(([id, qty]) => {
-      const item = FOOD_ITEMS.find((f) => f.id === id);
-      if (!item) return "";
-      subtotal += item.price * qty;
-      return `<div class="summary-line"><span>${item.name} × ${qty}</span><b>₹${item.price * qty}</b></div>`;
+  const rows = items
+    .map((item) => {
+      subtotal += item.price * item.quantity;
+
+      return `
+      <div class="summary-line">
+        <span>${item.food_name} × ${item.quantity}</span>
+        <b>₹${item.price * item.quantity}</b>
+      </div>
+    `;
     })
     .join("");
   const delivery = subtotal > 0 ? DELIVERY_FEE : 0;
@@ -390,15 +467,26 @@ function renderCheckoutSummary() {
 
   const form = document.querySelector("[data-checkout-form]");
   if (form) {
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
+
       if (!subtotal) {
         showToast("Your cart is empty");
         return;
       }
-      localStorage.removeItem(CART_KEY);
-      updateCartBadge();
-      window.location.href = "orders.html?placed=1";
+
+      const response = await fetch("/api/place-order", {
+        method: "POST",
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("Order placed successfully!");
+        window.location.href = "/orders";
+      } else {
+        showToast(result.message);
+      }
     });
   }
 }
@@ -558,6 +646,253 @@ function initFormValidation() {
   });
 }
 
+async function loadUserDetails() {
+  const fullname = document.getElementById("fullname");
+  if (!fullname) return;
+
+  const response = await fetch("/api/user");
+
+  if (response.status === 401) {
+    window.location.href = "/login";
+    return;
+  }
+
+  const user = await response.json();
+
+  document.getElementById("fullname").value = user.full_name;
+  document.getElementById("phone").value = user.phone;
+  document.getElementById("address").value = user.address;
+}
+
+async function renderOrders() {
+  const container = document.querySelector("[data-orders-list]");
+  if (!container) return;
+
+  const response = await fetch("/api/orders");
+
+  if (response.status === 401) {
+    window.location.href = "/login";
+    return;
+  }
+
+  const orders = await response.json();
+
+  if (orders.length === 0) {
+    container.innerHTML = `
+            <div class="order-card">
+                <h3>No Orders Yet</h3>
+                <p>Your placed orders will appear here.</p>
+            </div>
+        `;
+    return;
+  }
+
+  container.innerHTML = orders
+    .map((order) => {
+      const items = order.items
+        .map((item) => `${item.quantity}× ${item.food_name}`)
+        .join(", ");
+
+      return `
+            <div class="order-card">
+
+                <div class="order-top">
+
+                    <div class="order-id">
+                        #TB-${order.order_id}
+                        <small>${new Date(order.order_date).toLocaleString()}</small>
+                    </div>
+
+                    <span class="status-token ${getStatusClass(order.status)}">
+    ${order.status}
+</span>
+
+                </div>
+
+                <p class="order-items">
+                    ${items} —
+                    <strong>₹${order.total_amount}</strong>
+                </p>
+
+                <div class="order-track">
+                         ${getOrderTrack(order.status)} </div>
+
+            </div>
+        `;
+    })
+    .join("");
+}
+
+function getOrderTrack(status) {
+  let steps = ["Placed", "Preparing", "On the way", "Delivered"];
+
+  let completed = 0;
+
+  if (status === "Pending") {
+    completed = 1;
+  } else if (status === "Preparing") {
+    completed = 2;
+  } else if (status === "On the way") {
+    completed = 3;
+  } else if (status === "Delivered") {
+    completed = 4;
+  }
+
+  return steps
+    .map(
+      (step, index) => `
+        <div class="pt ${index < completed ? "done" : ""}">
+            <div class="dot"></div>
+            <span>${step}</span>
+        </div>
+    `,
+    )
+    .join("");
+}
+
+function getStatusClass(status) {
+  if (status === "Pending") {
+    return "status-pending";
+  }
+
+  if (status === "Preparing") {
+    return "status-preparing";
+  }
+
+  if (status === "On the way") {
+    return "status-otw";
+  }
+
+  if (status === "Delivered") {
+    return "status-delivered";
+  }
+
+  if (status === "Cancelled") {
+    return "status-cancelled";
+  }
+
+  return "status-pending";
+}
+
+async function renderAdminOrders() {
+  const container = document.querySelector("[data-admin-orders]");
+  if (!container) return;
+
+  const response = await fetch("/api/admin/orders");
+
+  if (response.status === 401) {
+    window.location.href = "/admin/login";
+    return;
+  }
+
+  const orders = await response.json();
+
+  if (orders.length === 0) {
+    container.innerHTML = `
+            <div class="order-card">
+                <h3>No Orders Found</h3>
+            </div>
+        `;
+    return;
+  }
+
+  container.innerHTML = orders
+    .map((order) => {
+      const items = order.items
+        .map((item) => `${item.quantity}× ${item.food_name}`)
+        .join(", ");
+
+      return `
+            <div class="order-card">
+
+                <div class="order-top">
+
+                    <div class="order-id">
+                        Order #${order.order_id}
+                        <small>
+                            ${new Date(order.order_date).toLocaleString()}
+                        </small>
+                    </div>
+
+                    <span class="status-token status-pending">
+                        ${order.status}
+                    </span>
+
+                </div>
+
+                <p><strong>Customer:</strong> ${order.customer}</p>
+
+                <p class="order-items">
+                    ${items}
+                </p>
+
+                <p>
+                    <strong>Total:</strong>
+                    ₹${order.total_amount}
+                </p>
+
+                <button
+                    class="btn btn-primary update-status-btn"
+                    data-order-id="${order.order_id}">
+                    Update Status
+                </button>
+
+            </div>
+        `;
+    })
+    .join("");
+}
+async function renderDashboardOrders() {
+  const tbody = document.querySelector("[data-dashboard-orders]");
+  if (!tbody) return;
+
+  const response = await fetch("/api/admin/orders");
+
+  if (response.status === 401) {
+    window.location.href = "/admin/login";
+    return;
+  }
+
+  const orders = await response.json();
+
+  tbody.innerHTML = orders
+    .slice(0, 5)
+    .map((order) => {
+      const items = order.items
+        .map((item) => `${item.food_name} ×${item.quantity}`)
+        .join(", ");
+
+      return `
+            <tr>
+
+                <td class="order-id">
+                    #TB-${order.order_id}
+                </td>
+
+                <td>
+                    ${order.customer}
+                </td>
+
+                <td>
+                    ${items}
+                </td>
+
+                <td class="price">
+                    ₹${order.total_amount}
+                </td>
+
+                <td>
+                    <span class="status-token ${getStatusClass(order.status)}">
+                        ${order.status}
+                    </span>
+                </td>
+
+            </tr>
+        `;
+    })
+    .join("");
+}
+
 /* ---------- boot ---------- */
 document.addEventListener("DOMContentLoaded", () => {
   initNav();
@@ -569,7 +904,10 @@ document.addEventListener("DOMContentLoaded", () => {
   renderManageFood();
   renderDashboard();
   initFormValidation();
-
+  loadUserDetails();
+  renderOrders();
+  renderAdminOrders();
+  renderDashboardOrders();
   // orders.html: show "placed" confirmation toast
   if (window.location.search.includes("placed=1"))
     showToast("Order placed successfully");

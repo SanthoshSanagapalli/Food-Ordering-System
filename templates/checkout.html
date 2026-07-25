@@ -25,10 +25,25 @@
           <a href="/cart">Cart</a>
         </nav>
         <div class="nav-actions">
-          <a href="cart.html" class="cart-link" aria-label="Cart"
+          <a href="/cart" class="cart-link" aria-label="Cart"
             >🧺<span class="cart-count" data-cart-count>0</span></a
           >
-          <a href="login.html" class="btn btn-secondary btn-sm">Log in</a>
+          {% if session.get("user_id") %}
+
+          <span class="user-name"> 👤 {{ session.get("user_name") }} </span>
+
+          <a href="{{ url_for('logout') }}" class="btn btn-secondary btn-sm">
+            Logout
+          </a>
+
+          {% else %}
+
+          <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">
+            Log in
+          </a>
+
+          {% endif %}
+
           <button type="button" class="btn btn-secondary btn-sm theme-toggle">
             🌙 Dark
           </button>
@@ -175,14 +190,28 @@
         </div>
         <div class="footer-col">
           <h5>Explore</h5>
-          <a href="menu.html">Menu</a>
-          <a href="orders.html">My orders</a>
-          <a href="cart.html">Cart</a>
+          <a href="/menu">Menu</a>
+          <a href="/orders">My orders</a>
+          <a href="/cart">Cart</a>
         </div>
         <div class="footer-col">
           <h5>Account</h5>
-          <a href="login.html">Log in</a>
-          <a href="register.html">Create account</a>
+
+          {%if session.get("user_id")%}
+          <span class="user-name"> 👤 {{ session.get("user_name") }} </span>
+
+          <a href="{{ url_for('logout') }}" class="btn btn-secondary btn-sm">
+            Logout
+          </a>
+
+          {% else %}
+
+          <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">
+            Log in
+          </a>
+
+          {% endif %}
+          <a href="/register">Create account</a>
           <a href="admin_login.html">Admin</a>
         </div>
         <div class="footer-col">
