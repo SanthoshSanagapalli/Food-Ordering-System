@@ -61,6 +61,12 @@
             <span class="eyebrow">Step 2 of 2</span>
             <h2>Where should we deliver?</h2>
           </div>
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div class="alert alert-{{ category }}" role="alert">
+            {{ message }}
+          </div>
+          {% endfor %} {% endif %} {% endwith %}
 
           <form class="checkout-grid" data-checkout-form>
             <div>

@@ -31,70 +31,103 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #12100d;
-  --bg-soft: #1d1a18;
-  --ink: #f3ede7;
-  --ink-soft: #c9c1b7;
-  --card: #1f1b18;
-  --border: #3a352f;
-  --primary: #ff8a5c;
-  --primary-dark: #e77a43;
-  --primary-tint: #33251c;
-  --accent: #d69d2f;
-  --accent-dark: #b2861f;
-  --accent-tint: #2f271e;
-  --green: #99b78f;
-  --green-tint: #2b3329;
-  --steel: #d0c4b5;
-  --steel-tint: #403d38;
-  --danger: #f28b81;
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.28), 0 10px 28px rgba(0, 0, 0, 0.2);
-  --shadow-pop: 0 6px 16px rgba(255, 138, 92, 0.18);
-}
+  /* Backgrounds */
+  --bg-color: #0f172a;
+  --surface-color: #1e293b;
+  --surface-secondary: #334155;
 
+  /* Text */
+  --text-color: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --muted-text: #94a3b8;
+
+  /* Borders */
+  --border-color: #334155;
+
+  /* Brand */
+  --primary-color: #f97316;
+  --primary-hover: #ea580c;
+
+  /* Status Colors */
+  --success-color: #22c55e;
+  --warning-color: #facc15;
+  --danger-color: #ef4444;
+  --info-color: #38bdf8;
+
+  /* Shadows */
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+  /* Cards */
+  --card-bg: #1e293b;
+
+  /* Navbar */
+  --navbar-bg: #111827;
+
+  /* Inputs */
+  --input-bg: #243447;
+
+  /* Hover */
+  --hover-bg: #334155;
+}
+.card,
+.dashboard-card,
+.menu-card,
+.cart-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+}
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
+
 html {
   scroll-behavior: smooth;
 }
+
 body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 16px;
-  transition:
-    background 0.25s ease,
-    color 0.25s ease;
+  background: var(--bg-color);
+  color: var(--text-color);
+  transition: 0.3s ease;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
+
 img {
   max-width: 100%;
   display: block;
 }
+
 a {
   color: inherit;
   text-decoration: none;
 }
+
 ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
+
 button {
   font-family: inherit;
   cursor: pointer;
 }
+
 input,
 select,
 textarea {
   font-family: inherit;
   font-size: 1rem;
 }
+
 h1,
 h2,
 h3,
@@ -213,7 +246,10 @@ p {
 .btn-danger:hover {
   background: #8f1e18;
 }
-
+.navbar {
+  background: var(--navbar-bg);
+  border-bottom: 1px solid var(--border-color);
+}
 .site-header {
   position: sticky;
   top: 0;

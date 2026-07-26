@@ -93,6 +93,10 @@
         </div>
         <h1>Kitchen admin</h1>
         <p>Log in to manage the menu, track orders and run the dashboard.</p>
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+        {% endfor %} {% endif %} {% endwith %}
 
         <form method="POST" action="{{url_for('admin_login')}}" data-validate>
           <div class="field">

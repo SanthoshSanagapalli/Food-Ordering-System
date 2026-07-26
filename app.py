@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for,jsonify
+from flask import Flask, render_template, request, redirect, session, url_for,jsonify,flash
 from werkzeug.security import generate_password_hash,check_password_hash
 from dbconnection import get_connection
 
@@ -40,8 +40,8 @@ def register():
         address = request.form.get("address")
 
         if password != confirm_password:
-            return "Passwords do not match"
-
+            flash("Passwords do not match", "danger")
+            return render_template("register.html")
         # Connect to MySQL
         con = get_connection()
         cmd = con.cursor()
@@ -57,7 +57,8 @@ def register():
         if existing_user is not None:
             cmd.close()
             con.close()
-            return "Email already registered"
+            flash("An account with this email already exists.", "warning")
+            return render_template("register.html")
 
         # Hash the password before storing it
         hashed_password = generate_password_hash(password)
@@ -78,10 +79,8 @@ def register():
         con.close()
 
         # Redirect to login page after successful registration
-        return redirect(url_for("login"))
-
-
-    return render_template("register.html")
+        flash("Registration successful! Please log in.", "success")
+    return redirect(url_for("login"))
 
 
 #API for User login
@@ -103,7 +102,10 @@ def login():
             session["user_name"] = users["full_name"]
             return redirect(url_for("home"))
         else:
-            return "Invalid email or password"
+            flash("Invalid email or password.", "danger")
+            return render_template("login.html")
+            
+
         
     return render_template("login.html")
 
@@ -141,10 +143,11 @@ def admin_login():
         ):
             session["admin_id"] = admin["admin_id"]
             session["admin_email"] = admin["email"]
-
+            flash("Admin login successful!", "success")
             return redirect(url_for("admin_dashboard"))
-
-        return "Invalid admin email or password"
+        else:
+            flash("Invalid admin email or password.", "danger")
+            return render_template("admin_login.html")
 
     return render_template("admin_login.html")
 
