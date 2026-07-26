@@ -81,3 +81,59 @@ CREATE TABLE order_items (
     quantity INT NOT NULL,
     price DECIMAL(10,2) NOT NULL
 );
+
+
+-- =========================================
+-- SAMPLE FOOD ITEMS
+-- =========================================
+
+INSERT INTO food_items
+(food_id, food_name, category, description, price, image, availability, veg)
+VALUES
+(1, 'Chicken Biryani', 'Biryani',
+'Aromatic basmati rice cooked with tender chicken and traditional Indian spices.',
+249.00, 'biryani.jpeg', 'Available', 0),
+
+(2, 'Masala Dosa', 'Dosa',
+'Crispy South Indian dosa filled with a flavorful potato masala and served with chutney.',
+99.00, 'dosa.jpeg', 'Available', 1),
+
+(3, 'Veg Thali', 'Thali',
+'A complete Indian meal served with rice, roti, dal, vegetables and accompaniments.',
+179.00, 'thali.jpeg', 'Available', 1),
+
+(4, 'Veg Dum Biryani', 'Biryani',
+'Fragrant basmati rice slow-cooked with fresh vegetables and aromatic spices.',
+199.00, 'vegdum.jpeg', 'Available', 0),
+
+(5, 'Paneer Butter Masala', 'Main Course',
+'Soft paneer cubes cooked in a rich and creamy tomato-based gravy.',
+229.00, 'paneer-butter-masala.jpeg', 'Available', 0),
+
+(6, 'Samosa', 'Snacks',
+'Crispy pastry filled with a spicy potato and pea mixture.',
+40.00, 'samosa.jpeg', 'Available', 1),
+
+(7, 'Onion Pakoda', 'Snacks',
+'Crispy onion fritters prepared with gram flour and traditional Indian spices.',
+79.00, 'onionpakoda.jpeg', 'Available', 1),
+
+(8, 'Rava Dosa', 'Dosa',
+'Thin and crispy South Indian dosa made with semolina and aromatic spices.',
+119.00, 'ravadosa.jpeg', 'Available', 1),
+
+(9, 'Rasmalai', 'Dessert',
+'Soft cottage cheese dumplings soaked in sweet and creamy saffron-flavoured milk.',
+99.00, 'rasmalai.jpeg', 'Available', 1),
+
+(10, 'Gulab Jamun', 'Dessert',
+'Soft milk-based dumplings soaked in fragrant sugar syrup.',
+79.00, 'gulabjamun.jpeg', 'Available', 1),
+
+(11, 'Masala Chai', 'Beverage',
+'Traditional Indian tea brewed with milk and aromatic spices.',
+40.00, 'masalachai.jpeg', 'Available', 1),
+
+(12, 'Sweet Lassi', 'Beverage',
+'Refreshing traditional yogurt-based drink served chilled.',
+69.00, 'sweet-lassi.jpeg', 'Available', 1);
