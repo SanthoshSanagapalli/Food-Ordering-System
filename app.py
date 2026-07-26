@@ -24,6 +24,8 @@ def orders():
 @app.route("/checkout")
 def checkout():
     return render_template("checkout.html")
+
+
 #API for User registration
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -711,17 +713,195 @@ def admin_orders():
 
     return jsonify(list(grouped_orders.values()))
 
+@app.route("/api/admin/foods", methods=["GET"])
+def admin_foods():
+
+    if "admin_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login as admin."
+        }), 401
+
+    con = get_connection()
+    cmd = con.cursor(dictionary=True)
+
+    cmd.execute("""
+        SELECT
+            food_id,
+            food_name,
+            category,
+            description,
+            price,
+            image,
+            availability,
+            veg
+        FROM food_items
+        ORDER BY food_id DESC
+    """)
+
+    foods = cmd.fetchall()
+
+    cmd.close()
+    con.close()
+
+    return jsonify(foods)
+
+@app.route("/manage-food")
+def manage_food():
+
+    if "admin_id" not in session:
+        return redirect(url_for("admin_login"))
+
+    return render_template("manage_food.html")
+
+@app.route("/api/admin/foods", methods=["POST"])
+def add_food():
+
+    if "admin_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login as admin."
+        }), 401
+
+    data = request.get_json()
+
+    con = get_connection()
+    cmd = con.cursor()
+
+    cmd.execute("""
+        INSERT INTO food_items
+        (
+            food_name,
+            category,
+            description,
+            price,
+            image,
+            availability,
+            veg
+        )
+        VALUES (%s,%s,%s,%s,%s,%s,%s)
+    """, (
+        data["food_name"],
+        data["category"],
+        data.get("description"),
+        data["price"],
+        data.get("image"),
+        data.get("availability", "Available"),
+        data["veg"]
+    ))
+
+    con.commit()
+
+    cmd.close()
+    con.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Food added successfully."
+    })
+
+@app.route("/api/admin/foods/<int:food_id>", methods=["PUT"])
+def update_food(food_id):
+
+    if "admin_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login as admin."
+        }), 401
+
+    data = request.get_json()
+
+    con = get_connection()
+    cmd = con.cursor()
+
+    cmd.execute("""
+        UPDATE food_items
+        SET
+            food_name=%s,
+            category=%s,
+            description=%s,
+            price=%s,
+            image=%s,
+            availability=%s,
+            veg=%s
+        WHERE food_id=%s
+    """, (
+    data["food_name"],
+    data["category"],
+    data.get("description"),
+    data["price"],
+    data.get("image"),
+    data.get("availability", "Available"),
+    data["veg"],
+    food_id
+))
+
+    con.commit()
+
+    cmd.close()
+    con.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Dish updated successfully."
+    })
 
 
+@app.route("/api/admin/foods/<int:food_id>", methods=["DELETE"])
+def delete_food(food_id):
+    conn = get_connection()
+    cursor = conn.cursor()
 
+    cursor.execute(
+        "DELETE FROM food_items WHERE food_id = %s",
+        (food_id,)
+    )
 
+    conn.commit()
+    cursor.close()
+    conn.close()
 
+    return jsonify({
+        "success": True,
+        "message": "Food deleted successfully"
+    })
 
+@app.route("/admin/orders")
+def admin_orders_page():
+    return render_template("admin_orders.html")
 
+@app.route("/api/admin/orders/<int:order_id>", methods=["PUT"])
+def update_order_status(order_id):
 
+    if "admin_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login as admin."
+        }), 401
 
+    data = request.get_json()
 
+    con = get_connection()
+    cmd = con.cursor()
 
+    cmd.execute(
+        """
+        UPDATE orders
+        SET status = %s
+        WHERE order_id = %s
+        """,
+        (data["status"], order_id)
+    )
+
+    con.commit()
+
+    cmd.close()
+    con.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Status updated successfully."
+    })
 
 
 

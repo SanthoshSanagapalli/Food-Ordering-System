@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Manage Food — Tiffin Box Admin</title>
-    <link rel="icon" href="../static/images/logo-mark.svg" type="image/svg+xml" />
+    <link
+      rel="icon"
+      href="../static/images/logo-mark.svg"
+      type="image/svg+xml"
+    />
     <link rel="stylesheet" href="../static/css/style.css" />
   </head>
   <body>
@@ -19,10 +23,12 @@
           <span class="brand-name">Tiffin<em>Box</em></span>
         </div>
         <nav class="admin-nav">
-          <a href="dashboard.html">📊 Dashboard</a>
-          <a href="manage_food.html" class="active">🍲 Manage food</a>
-          <a href="orders.html">🧾 Orders</a>
-          <a href="admin_login.html">🚪 Log out</a>
+          <a href="{{ url_for('admin_dashboard') }}">📊 Dashboard</a>
+          <a href="{{ url_for('manage_food') }}" class="active"
+            >🍲 Manage food</a
+          >
+          <a href="{{ url_for('admin_orders') }}">🧾 Orders</a>
+          <a href="{{ url_for('admin_logout') }}">Logout</a>
         </nav>
       </aside>
 
@@ -37,10 +43,9 @@
         <div class="panel">
           <div class="panel-head">
             <h3>All dishes</h3>
-            <span class="field-hint"
-              >Changes save to this browser for the demo — wire this table to
-              your API for production.</span
-            >
+            <span class="field-hint">
+              Manage all food items available in the menu.
+            </span>
           </div>
           <table>
             <thead>

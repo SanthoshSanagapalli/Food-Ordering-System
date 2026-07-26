@@ -493,70 +493,40 @@ async function renderCheckoutSummary() {
 
 /* ---------- admin: manage food (localStorage CRUD demo) ---------- */
 const ADMIN_FOOD_KEY = "tiffin_admin_food";
-function getAdminFood() {
-  try {
-    const stored = JSON.parse(localStorage.getItem(ADMIN_FOOD_KEY));
-    if (stored) return stored;
-  } catch (e) {
-    /* fall through */
-  }
-  const seeded = FOOD_ITEMS.map((f) => ({ ...f, stock: true }));
-  localStorage.setItem(ADMIN_FOOD_KEY, JSON.stringify(seeded));
-  return seeded;
-}
-function saveAdminFood(items) {
-  localStorage.setItem(ADMIN_FOOD_KEY, JSON.stringify(items));
+let editingId = null;
+
+const modalBackdrop = document.querySelector("[data-food-modal]");
+const form = document.querySelector("[data-food-form]");
+const modalTitle = document.querySelector("[data-modal-title]");
+const tbody = document.querySelector("[data-food-table-body]");
+function openModal(food = null) {
+  editingId = food ? food.food_id : null;
+
+  modalTitle.textContent = food ? "Edit Dish" : "Add New Dish";
+
+  form.name.value = food ? food.food_name : "";
+  form.category.value = food ? food.category : "";
+  form.price.value = food ? food.price : "";
+  form.veg.value = food ? (food.veg ? "true" : "false") : "true";
+
+  form.stock.checked = food ? food.availability === "Available" : true;
+
+  form.desc.value = food ? food.description : "";
+
+  modalBackdrop.classList.add("open");
 }
 
+function closeModal() {
+  modalBackdrop.classList.remove("open");
+
+  editingId = null;
+
+  form.reset();
+}
 function renderManageFood() {
-  const tbody = document.querySelector("[data-food-table-body]");
-  if (!tbody) return;
-  const modalBackdrop = document.querySelector("[data-food-modal]");
-  const form = document.querySelector("[data-food-form]");
-  const modalTitle = document.querySelector("[data-modal-title]");
-  let editingId = null;
-
-  function draw() {
-    const items = getAdminFood();
-    tbody.innerHTML = items
-      .map(
-        (item) => `
-      <tr data-id="${item.id}">
-        <td>
-          <div class="row-food">
-            <div class="thumb"><img src="${IMG_BASE}${item.icon}" alt="" /></div>
-            <div><strong>${item.name}</strong><br><span class="tag">${item.category}</span></div>
-          </div>
-        </td>
-        <td>${item.veg ? "Veg" : "Non-veg"}</td>
-        <td class="price">₹${item.price}</td>
-        <td><span class="badge-stock ${item.stock ? "badge-in" : "badge-out"}">${item.stock ? "In stock" : "Out of stock"}</span></td>
-        <td>
-          <button type="button" class="icon-btn" data-action="edit" title="Edit">✎</button>
-          <button type="button" class="icon-btn" data-action="delete" title="Delete">🗑</button>
-        </td>
-      </tr>
-    `,
-      )
-      .join("");
+  if (!modalBackdrop || !form || !document.querySelector("[data-open-add]")) {
+    return;
   }
-
-  function openModal(item) {
-    editingId = item ? item.id : null;
-    modalTitle.textContent = item ? "Edit dish" : "Add new dish";
-    form.name.value = item ? item.name : "";
-    form.category.value = item ? item.category : "thali";
-    form.price.value = item ? item.price : "";
-    form.veg.value = item ? String(item.veg) : "true";
-    form.stock.checked = item ? item.stock : true;
-    form.desc.value = item ? item.desc : "";
-    modalBackdrop.classList.add("open");
-  }
-  function closeModal() {
-    modalBackdrop.classList.remove("open");
-    editingId = null;
-  }
-
   document
     .querySelectorAll("[data-open-add]")
     .forEach((btn) => btn.addEventListener("click", () => openModal(null)));
@@ -567,62 +537,70 @@ function renderManageFood() {
     if (e.target === modalBackdrop) closeModal();
   });
 
-  tbody.addEventListener("click", (e) => {
-    const row = e.target.closest("tr");
-    if (!row) return;
-    const id = row.dataset.id;
-    const items = getAdminFood();
-    if (e.target.dataset.action === "edit")
-      openModal(items.find((i) => i.id === id));
-    if (e.target.dataset.action === "delete") {
-      saveAdminFood(items.filter((i) => i.id !== id));
-      draw();
-      showToast("Dish removed");
-    }
-  });
-
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const items = getAdminFood();
-    const payload = {
-      name: form.name.value.trim(),
-      category: form.category.value,
-      price: Number(form.price.value) || 0,
-      veg: form.veg.value === "true",
-      stock: form.stock.checked,
-      desc: form.desc.value.trim(),
-      icon: `icon-${form.category.value}.svg`,
-      tag: form.category.value === "thali" ? "Meal" : "New",
-    };
-    if (editingId) {
-      const idx = items.findIndex((i) => i.id === editingId);
-      items[idx] = { ...items[idx], ...payload };
-      showToast("Dish updated");
-    } else {
-      payload.id = "f" + Date.now();
-      items.unshift(payload);
-      showToast("Dish added");
-    }
-    saveAdminFood(items);
-    closeModal();
-    draw();
-  });
 
-  draw();
+    const payload = {
+      food_name: form.name.value.trim(),
+      category: form.category.value,
+      description: form.desc.value.trim(),
+      price: Number(form.price.value),
+      image: null,
+      availability: form.stock.checked ? "Available" : "Unavailable",
+      veg: form.veg.value === "true" ? 1 : 0,
+    };
+
+    let url = "/api/admin/foods";
+    let method = "POST";
+
+    if (editingId !== null) {
+      url = `/api/admin/foods/${editingId}`;
+      method = "PUT";
+    }
+
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      showToast(
+        editingId ? "Dish updated successfully" : "Dish added successfully",
+      );
+
+      closeModal();
+      form.reset();
+      renderFoods();
+      editingId = null;
+    } else {
+      showToast(result.message);
+    }
+  });
 }
 
 /* ---------- admin: dashboard demo stats ---------- */
-function renderDashboard() {
+async function renderDashboard() {
   const el = document.querySelector("[data-dashboard]");
   if (!el) return;
-  const items = getAdminFood();
-  const outOfStock = items.filter((i) => !i.stock).length;
+
+  const response = await fetch("/api/admin/foods");
+  const foods = await response.json();
+
+  const outOfStock = foods.filter(
+    (food) => food.availability === "Unavailable",
+  ).length;
+
   const totalDishes = document.querySelector("[data-stat-dishes]");
   const totalOOS = document.querySelector("[data-stat-oos]");
-  if (totalDishes) totalDishes.textContent = items.length;
+
+  if (totalDishes) totalDishes.textContent = foods.length;
   if (totalOOS) totalOOS.textContent = outOfStock;
 }
-
 /* ---------- simple form validation ---------- */
 function initFormValidation() {
   document.querySelectorAll("form[data-validate]").forEach((form) => {
@@ -775,8 +753,8 @@ function getStatusClass(status) {
 }
 
 async function renderAdminOrders() {
-  const container = document.querySelector("[data-admin-orders]");
-  if (!container) return;
+  const tbody = document.querySelector("[data-admin-orders-table]");
+  if (!tbody) return;
 
   const response = await fetch("/api/admin/orders");
 
@@ -788,60 +766,103 @@ async function renderAdminOrders() {
   const orders = await response.json();
 
   if (orders.length === 0) {
-    container.innerHTML = `
-            <div class="order-card">
-                <h3>No Orders Found</h3>
-            </div>
+    tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center;">
+                    No orders found.
+                </td>
+            </tr>
         `;
     return;
   }
 
-  container.innerHTML = orders
+  tbody.innerHTML = orders
     .map((order) => {
       const items = order.items
-        .map((item) => `${item.quantity}× ${item.food_name}`)
+        .map((item) => `${item.food_name} × ${item.quantity}`)
         .join(", ");
 
       return `
-            <div class="order-card">
+            <tr>
 
-                <div class="order-top">
+                <td>#TB-${order.order_id}</td>
 
-                    <div class="order-id">
-                        Order #${order.order_id}
-                        <small>
-                            ${new Date(order.order_date).toLocaleString()}
-                        </small>
-                    </div>
+                <td>${order.customer}</td>
 
-                    <span class="status-token status-pending">
+                <td>${items}</td>
+
+                <td>₹${order.total_amount}</td>
+
+                <td>
+                    <span class="status-token ${getStatusClass(order.status)}">
                         ${order.status}
                     </span>
+                </td>
 
-                </div>
+                <td>
+                      <select
+                          class="order-status-select"
+                          data-order-id="${order.order_id}">
 
-                <p><strong>Customer:</strong> ${order.customer}</p>
+                          <option value="Pending"
+                              ${order.status === "Pending" ? "selected" : ""}>
+                              Pending
+                          </option>
 
-                <p class="order-items">
-                    ${items}
-                </p>
+                          <option value="Preparing"
+                              ${order.status === "Preparing" ? "selected" : ""}>
+                              Preparing
+                          </option>
 
-                <p>
-                    <strong>Total:</strong>
-                    ₹${order.total_amount}
-                </p>
+                          <option value="Out for Delivery"
+                              ${order.status === "Out for Delivery" ? "selected" : ""}>
+                              Out for Delivery
+                          </option>
 
-                <button
-                    class="btn btn-primary update-status-btn"
-                    data-order-id="${order.order_id}">
-                    Update Status
-                </button>
+                          <option value="Delivered"
+                              ${order.status === "Delivered" ? "selected" : ""}>
+                              Delivered
+                          </option>
 
-            </div>
+                          <option value="Cancelled"
+                              ${order.status === "Cancelled" ? "selected" : ""}>
+                              Cancelled
+                          </option>
+
+                      </select>
+                    </td>
+
+            </tr>
         `;
     })
     .join("");
+  tbody.querySelectorAll(".order-status-select").forEach((select) => {
+    select.addEventListener("change", async () => {
+      const orderId = select.dataset.orderId;
+      const status = select.value;
+
+      const response = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: status,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("Order status updated successfully");
+        renderAdminOrders();
+      } else {
+        showToast(result.message);
+      }
+    });
+  });
 }
+
 async function renderDashboardOrders() {
   const tbody = document.querySelector("[data-dashboard-orders]");
   if (!tbody) return;
@@ -893,6 +914,105 @@ async function renderDashboardOrders() {
     .join("");
 }
 
+async function renderFoods() {
+  const tbody = document.querySelector("[data-food-table-body]");
+  if (!tbody) return;
+
+  const response = await fetch("/api/admin/foods");
+
+  if (response.status === 401) {
+    window.location.href = "/admin/login";
+    return;
+  }
+
+  const foods = await response.json();
+
+  if (foods.length === 0) {
+    tbody.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align:center;">
+                    No food items found.
+                </td>
+            </tr>
+        `;
+    return;
+  }
+
+  tbody.innerHTML = foods
+    .map(
+      (food) => `
+        <tr>
+
+            <td>${food.food_name}</td>
+
+            <td>${food.veg ? "🥗 Veg" : "🍗 Non-Veg"}</td>
+
+            <td>₹${food.price}</td>
+
+            <td>${food.availability}</td>
+
+            <td>
+                <button
+    class="btn btn-secondary btn-sm edit-food-btn"
+    data-food-id="${food.food_id}">
+    Edit
+</button>
+
+                <button
+    class="btn btn-danger btn-sm delete-food-btn"
+    data-food-id="${food.food_id}">
+    Delete
+</button>
+            </td>
+
+        </tr>
+    `,
+    )
+    .join("");
+  tbody.querySelectorAll(".edit-food-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      const foodId = Number(button.dataset.foodId);
+
+      const food = foods.find((item) => item.food_id === foodId);
+
+      openModal(food);
+    });
+  });
+  tbody.querySelectorAll(".delete-food-btn").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const foodId = button.dataset.foodId;
+
+      const confirmDelete = confirm(
+        "Are you sure you want to delete this dish?",
+      );
+
+      if (!confirmDelete) return;
+
+      const response = await fetch(`/api/admin/foods/${foodId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("Dish deleted successfully");
+        renderFoods();
+      } else {
+        showToast(result.message);
+      }
+    });
+  });
+  tbody.querySelectorAll(".edit-food-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      const foodId = button.dataset.foodId;
+
+      const food = foods.find((item) => item.food_id == foodId);
+
+      openModal(food);
+    });
+  });
+}
+
 /* ---------- boot ---------- */
 document.addEventListener("DOMContentLoaded", () => {
   initNav();
@@ -908,6 +1028,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderOrders();
   renderAdminOrders();
   renderDashboardOrders();
+  renderFoods();
   // orders.html: show "placed" confirmation toast
   if (window.location.search.includes("placed=1"))
     showToast("Order placed successfully");
