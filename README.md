@@ -92,7 +92,7 @@ Food-Ordering-System/
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Food-Ordering-System.git
+git clone https://github.com/SanthoshSanagapalli/Food-Ordering-System.git
 ```
 
 ### 2️⃣ Navigate to the Project Folder
