@@ -128,10 +128,45 @@ pip install -r requirements.txt
 ```
 
 ### 6️⃣ Configure MySQL Database
+## Database Setup
 
-- Create a MySQL database.
-- Import the SQL tables.
-- Update your database credentials in `dbconnection.py`.
+1. Install MySQL Server.
+
+2. Create a database:
+
+```sql
+CREATE DATABASE food;
+```
+
+3. Import the database schema.
+
+Using MySQL Command Line:
+
+```bash
+mysql -u root -p food < database.sql
+```
+
+Or, using MySQL Workbench:
+
+- Open MySQL Workbench.
+- Create or select the `food` database.
+- Open the `database.sql` file.
+- Click **Execute** to create all the required tables.
+
+4. Update your MySQL credentials in `dbconnection.py`:
+
+```python
+host = "localhost"
+user = "root"
+password = "your_password"
+database = "food"
+```
+
+5. Run the Flask application:
+
+```bash
+python app.py
+```
 
 ### 7️⃣ Run the Application
 
