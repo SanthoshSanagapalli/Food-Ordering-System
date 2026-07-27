@@ -491,7 +491,6 @@ async function renderCheckoutSummary() {
   }
 }
 
-/* ---------- admin: manage food (localStorage CRUD demo) ---------- */
 const ADMIN_FOOD_KEY = "tiffin_admin_food";
 let editingId = null;
 
@@ -499,6 +498,7 @@ const modalBackdrop = document.querySelector("[data-food-modal]");
 const form = document.querySelector("[data-food-form]");
 const modalTitle = document.querySelector("[data-modal-title]");
 const tbody = document.querySelector("[data-food-table-body]");
+
 function openModal(food = null) {
   editingId = food ? food.food_id : null;
 
@@ -523,6 +523,7 @@ function closeModal() {
 
   form.reset();
 }
+
 function renderManageFood() {
   if (!modalBackdrop || !form || !document.querySelector("[data-open-add]")) {
     return;
@@ -601,6 +602,7 @@ async function renderDashboard() {
   if (totalDishes) totalDishes.textContent = foods.length;
   if (totalOOS) totalOOS.textContent = outOfStock;
 }
+
 /* ---------- simple form validation ---------- */
 function initFormValidation() {
   document.querySelectorAll("form[data-validate]").forEach((form) => {

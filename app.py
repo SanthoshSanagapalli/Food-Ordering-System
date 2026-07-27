@@ -2,10 +2,8 @@ from flask import Flask, render_template, request, redirect, session, url_for,js
 from werkzeug.security import generate_password_hash,check_password_hash
 from dbconnection import get_connection
 
-
 app = Flask(__name__)
 app.secret_key = "abc"
-
 
 # Home page
 @app.route("/")
@@ -47,10 +45,7 @@ def register():
         cmd = con.cursor()
 
         # Check whether email is already registered
-        cmd.execute(
-            "SELECT * FROM users WHERE email = %s",
-            (email,)
-        )
+        cmd.execute( "SELECT * FROM users WHERE email = %s",(email,))
 
         existing_user = cmd.fetchone()
 
@@ -64,13 +59,9 @@ def register():
         hashed_password = generate_password_hash(password)
 
         # Insert user into database
-        cmd.execute(
-            """
-            INSERT INTO users (full_name, email, phone, password,address)
-            VALUES (%s, %s, %s, %s,%s)
-            """,
-            (full_name, email, phone, hashed_password,address)
-        )
+        cmd.execute(""" INSERT INTO users (full_name, email, phone, password,address)
+            VALUES (%s, %s, %s, %s,%s)""",
+            (full_name, email, phone, hashed_password,address))
 
         con.commit()
 
@@ -128,10 +119,7 @@ def admin_login():
         con = get_connection()
         cmd = con.cursor(dictionary=True)
 
-        cmd.execute(
-            "SELECT * FROM admins WHERE email = %s",
-            (email,)
-        )
+        cmd.execute("SELECT * FROM admins WHERE email = %s",(email,))
 
         admin = cmd.fetchone()
 
@@ -855,10 +843,7 @@ def delete_food(food_id):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "DELETE FROM food_items WHERE food_id = %s",
-        (food_id,)
-    )
+    cursor.execute("DELETE FROM food_items WHERE food_id = %s",(food_id,))
 
     conn.commit()
     cursor.close()
@@ -887,14 +872,8 @@ def update_order_status(order_id):
     con = get_connection()
     cmd = con.cursor()
 
-    cmd.execute(
-        """
-        UPDATE orders
-        SET status = %s
-        WHERE order_id = %s
-        """,
-        (data["status"], order_id)
-    )
+    cmd.execute("""UPDATE orders SET status = % WHERE order_id = %s """,
+                (data["status"], order_id))
 
     con.commit()
 
