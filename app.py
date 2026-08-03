@@ -872,8 +872,10 @@ def update_order_status(order_id):
     con = get_connection()
     cmd = con.cursor()
 
-    cmd.execute("""UPDATE orders SET status = % WHERE order_id = %s """,
-                (data["status"], order_id))
+    cmd.execute(
+        "UPDATE orders SET status = %s WHERE order_id = %s",
+        (data.get("status"), order_id),
+    )
 
     con.commit()
 
