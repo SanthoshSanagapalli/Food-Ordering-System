@@ -139,6 +139,43 @@ def admin_login():
 
     return render_template("admin_login.html")
 
+@app.route("/admin/create", methods=["POST"])
+def create_admin():
+    email = request.form.get("email")
+    password = request.form.get("password")
+    confirm_password = request.form.get("confirm_password")
+
+    if not email or not password or not confirm_password:
+        flash("Please fill in all fields.", "warning")
+        return redirect(url_for("admin_login") + "#create-admin")
+
+    if password != confirm_password:
+        flash("Passwords do not match.", "danger")
+        return redirect(url_for("admin_login") + "#create-admin")
+
+    con = get_connection()
+    cmd = con.cursor(dictionary=True)
+    cmd.execute("SELECT * FROM admins WHERE email = %s", (email,))
+    existing_admin = cmd.fetchone()
+
+    if existing_admin is not None:
+        cmd.close()
+        con.close()
+        flash("This email is already registered as an admin.", "warning")
+        return redirect(url_for("admin_login") + "#create-admin")
+
+    hashed_password = generate_password_hash(password)
+    cmd.execute(
+        "INSERT INTO admins (email, password) VALUES (%s, %s)",
+        (email, hashed_password),
+    )
+    con.commit()
+    cmd.close()
+    con.close()
+
+    flash("Admin account created successfully. Please log in.", "success")
+    return redirect(url_for("admin_login") + "#create-admin")
+
 #API to remove the session of the admin 
 @app.route("/admin/dashboard")
 def admin_dashboard():

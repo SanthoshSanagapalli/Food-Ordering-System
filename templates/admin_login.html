@@ -3,20 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Log In — Tiffin Box</title>
+    <title>Admin Portal — Tiffin Box</title>
+
+    <!-- Favicon & Stylesheets -->
     <link
       rel="icon"
-      href="../static/images/logo-mark.svg"
+      href="{{ url_for('static', filename='images/logo-mark.svg') }}"
       type="image/svg+xml"
     />
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}"
     />
+
     <style>
       body {
-        background: var(--ink);
+        background: var(--ink, #1a1410);
       }
+
       .admin-auth-wrap {
         min-height: 100vh;
         display: flex;
@@ -24,61 +28,108 @@
         justify-content: center;
         padding: 40px 20px;
       }
+
       .admin-auth-card {
         width: 100%;
         max-width: 400px;
         background: #2b2117;
         border: 1px solid #3e3225;
-        border-radius: var(--radius-l);
+        border-radius: var(--radius-l, 12px);
         padding: 40px 36px;
         color: #efe7d8;
       }
-      .admin-auth-card h1 {
+
+      .admin-auth-card h1,
+      .admin-auth-card h2 {
         color: #fff;
         text-align: center;
+        margin-top: 0;
+      }
+
+      .admin-auth-card h1 {
         font-size: 1.6rem;
       }
+
+      .admin-auth-card h2 {
+        font-size: 1.4rem;
+        margin-bottom: 8px;
+      }
+
       .admin-auth-card p {
         color: #b7ac97;
         text-align: center;
+        margin-bottom: 20px;
       }
+
+      .admin-auth-card .field {
+        margin-bottom: 16px;
+      }
+
       .admin-auth-card .field label {
+        display: block;
+        margin-bottom: 6px;
         color: #d8cfbe;
       }
+
       .admin-auth-card .field input {
+        width: 100%;
+        padding: 10px 12px;
+        box-sizing: border-box;
         background: #241c15;
-        border-color: #3e3225;
+        border: 1px solid #3e3225;
+        border-radius: 6px;
         color: #fff;
       }
+
       .admin-auth-card .field input:focus {
-        border-color: var(--accent);
+        outline: none;
+        border-color: var(--accent, #d97706);
         background: #241c15;
       }
-      .admin-back {
+
+      .admin-back,
+      .toggle-link {
         display: block;
         text-align: center;
         margin-top: 18px;
         color: #b7ac97;
         font-size: 0.85rem;
+        text-decoration: none;
+        cursor: pointer;
+        background: none;
+        border: none;
+        width: 100%;
       }
-      .admin-back:hover {
+
+      .admin-back:hover,
+      .toggle-link:hover {
         color: #fff;
+        text-decoration: underline;
+      }
+
+      /* Class to hide forms dynamically */
+      .is-hidden {
+        display: none !important;
       }
     </style>
   </head>
+
   <body>
     <main class="admin-auth-wrap">
       <div class="admin-auth-card">
+        <!-- Logo -->
         <div
           class="logo-row"
           style="display: flex; justify-content: center; margin-bottom: 18px"
         >
           <img
             src="{{ url_for('static', filename='images/logo-mark.svg') }}"
-            alt="error"
+            alt="Tiffin Box Logo"
             width="34"
           />
         </div>
+
+        <!-- Controls -->
         <div
           style="
             display: flex;
@@ -91,49 +142,161 @@
             🌙 Dark
           </button>
         </div>
-        <h1>Kitchen admin</h1>
-        <p>Log in to manage the menu, track orders and run the dashboard.</p>
+
+        <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %} {% if
         messages %} {% for category, message in messages %}
         <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
         {% endfor %} {% endif %} {% endwith %}
 
-        <form method="POST" action="{{url_for('admin_login')}}" data-validate>
-          <div class="field">
-            <label for="admin_email">Admin email</label>
-            <input
-              type="email"
-              id="admin_email"
-              name="email"
-              placeholder="admin@tiffinbox.com"
-              required
-            />
-          </div>
-          <div class="field">
-            <label for="admin_password">Password</label>
-            <input
-              type="password"
-              id="admin_password"
-              name="password"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            class="btn btn-primary btn-block"
-            style="margin-top: 10px"
-          >
-            Log in to dashboard
-          </button>
-        </form>
+        <!-- SECTION 1: LOGIN FORM -->
+        <section id="login-section">
+          <h1>Kitchen admin</h1>
+          <p>Log in to manage the menu, track orders and run the dashboard.</p>
 
-        <a href="{{url_for('home')}}" class="admin-back"
-          >← Back to customer site</a
+          <form
+            method="POST"
+            action="{{ url_for('admin_login') }}"
+            data-validate
+          >
+            <div class="field">
+              <label for="admin_email">Admin email</label>
+              <input
+                type="email"
+                id="admin_email"
+                name="email"
+                placeholder="admin@tiffinbox.com"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <label for="admin_password">Password</label>
+              <input
+                type="password"
+                id="admin_password"
+                name="password"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary btn-block"
+              style="margin-top: 10px; width: 100%"
+            >
+              Log in to dashboard
+            </button>
+          </form>
+
+          <button type="button" class="toggle-link" id="show-create-btn">
+            Create a new admin account
+          </button>
+        </section>
+
+        <!-- SECTION 2: CREATE ADMIN FORM (Hidden by default) -->
+        <section id="create-admin-section" class="is-hidden">
+          <h2>Create Admin Account</h2>
+          <p>Register a new administrator for the kitchen portal.</p>
+
+          <form
+            method="POST"
+            action="{{ url_for('create_admin') }}"
+            data-validate
+          >
+            <div class="field">
+              <label for="create_admin_email">Admin email</label>
+              <input
+                type="email"
+                id="create_admin_email"
+                name="email"
+                placeholder="newadmin@tiffinbox.com"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <label for="create_admin_password">Password</label>
+              <input
+                type="password"
+                id="create_admin_password"
+                name="password"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <label for="create_admin_confirm_password"
+                >Confirm Password</label
+              >
+              <input
+                type="password"
+                id="create_admin_confirm_password"
+                name="confirm_password"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-secondary btn-block"
+              style="margin-top: 10px; width: 100%"
+            >
+              Create admin account
+            </button>
+          </form>
+
+          <button type="button" class="toggle-link" id="show-login-btn">
+            ← Already have an account? Log in
+          </button>
+        </section>
+
+        <!-- Footer Link -->
+        <div
+          style="
+            margin-top: 24px;
+            border-top: 1px solid #3e3225;
+            padding-top: 16px;
+          "
         >
+          <a
+            href="{{ url_for('home') }}"
+            class="admin-back"
+            style="margin-top: 0"
+            >← Back to customer site</a
+          >
+        </div>
       </div>
     </main>
 
     <script src="{{ url_for('static', filename='javascript/script.js') }}"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const loginSection = document.getElementById("login-section");
+        const createAdminSection = document.getElementById(
+          "create-admin-section",
+        );
+        const showCreateBtn = document.getElementById("show-create-btn");
+        const showLoginBtn = document.getElementById("show-login-btn");
+
+        // Show Create Form, Hide Login Form
+        showCreateBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          loginSection.classList.add("is-hidden");
+          createAdminSection.classList.remove("is-hidden");
+        });
+
+        // Show Login Form, Hide Create Form
+        showLoginBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          createAdminSection.classList.add("is-hidden");
+          loginSection.classList.remove("is-hidden");
+        });
+      });
+    </script>
   </body>
 </html>
